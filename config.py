@@ -9,7 +9,6 @@ import configparser
 from urllib import request
 
 
-
 class path:
     # 直接通过属性名调用 不可更改
     # 文件路径
@@ -35,7 +34,8 @@ class path:
     @staticmethod
     def get_ajax_discovery_data_path():
         '''向推荐页面请求的推荐数据保存路径'''
-        return os.path.dirname(__file__) + '/data/wwwpixivnet_ajax_discovery_artworks.json'
+        return os.path.dirname(
+            __file__) + '/data/wwwpixivnet_ajax_discovery_artworks.json'
 
     @staticmethod
     def get_download_record_path():
@@ -108,12 +108,11 @@ class url:
 
 
 class recordcookie:
-    custom_cookie = {
-
-    }
+    custom_cookie = {}
 
     headtemplate = {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.30',
+        'user-agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.30',
         'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
         'referer': 'https://www.pixiv.net/discovery'
     }
@@ -245,13 +244,13 @@ class recordcookie:
 # 通过静态方法调用放外面
 # 默认设置
 default_setting = {
-    'image_quality': 'original',    # thumb_mini small regular original 图片质量
-    'is_cover': False,              # 是否覆盖
-    'browser': 'edge',              # firefox chrome
-    'forcelogin': False,            # 是否强制登录
+    'image_quality': 'original',  # thumb_mini small regular original 图片质量
+    'is_cover': False,  # 是否覆盖
+    'browser': 'edge',  # firefox chrome
+    'forcelogin': False,  # 是否强制登录
     'download_path': path.get_tutu_dir(),  # 下载文件夹
-    'is_proxies': True,            # 是否启用代理
-    'proxies': {                   # 代理
+    'is_proxies': True,  # 是否启用代理
+    'proxies': {  # 代理
         'http': 'http://127.0.0.1:1080',
         'https': 'https://127.0.0.1:1080'
     },
@@ -278,9 +277,12 @@ class config:
     @staticmethod
     def get_image_quality():
         '''获取图片质量'''
-        image_quality = conf.get(
-            ads, 'image_quality', fallback=default_setting.get('image_quality'))
-        if image_quality.__eq__('thumb_mini') or image_quality.__eq__('small') or image_quality.__eq__('regular') or image_quality.__eq__('original'):
+        image_quality = conf.get(ads,
+                                 'image_quality',
+                                 fallback=default_setting.get('image_quality'))
+        if image_quality.__eq__('thumb_mini') or image_quality.__eq__(
+                'small') or image_quality.__eq__(
+                    'regular') or image_quality.__eq__('original'):
             return image_quality
 
         return default_setting.get('image_quality')
@@ -288,16 +290,19 @@ class config:
     @staticmethod
     def get_is_cover():
         '''获取是否被覆盖'''
-        is_cover = conf.getboolean(
-            ads, 'is_cover', fallback=default_setting.get('is_cover'))
+        is_cover = conf.getboolean(ads,
+                                   'is_cover',
+                                   fallback=default_setting.get('is_cover'))
         return is_cover
 
     @staticmethod
     def get_browser():
         '''获取设置的浏览器'''
-        browser = conf.get(
-            link, 'browser', fallback=default_setting.get('browser'))
-        if browser.__eq__('chrome') or browser.__eq__('firefox') or browser.__eq__('edge'):
+        browser = conf.get(link,
+                           'browser',
+                           fallback=default_setting.get('browser'))
+        if browser.__eq__('chrome') or browser.__eq__(
+                'firefox') or browser.__eq__('edge'):
             return browser
 
         return default_setting.get('browser')
@@ -312,7 +317,8 @@ class config:
     @staticmethod
     def get_ads_download_path():
         '''获取设置的下载位置'''
-        path = conf.get(ads, 'download_path',
+        path = conf.get(ads,
+                        'download_path',
                         fallback=default_setting.get('download_path'))
         if os.path.exists(path=path):
             if path[path.__len__() - 1].__eq__('/'):
@@ -333,10 +339,7 @@ class config:
         http = conf.get(link, 'http', fallback='http://127.0.0.1:1080')
         https = conf.get(link, 'https', fallback='https://127.0.0.1:1080')
 
-        proxies_dict = {
-            'http': http,
-            'https': https
-        }
+        proxies_dict = {'http': http, 'https': https}
         return proxies_dict
 
     @staticmethod
@@ -350,12 +353,14 @@ class config:
         else:
             qd['mode'] = default_setting.get('mode')
 
-        limit = conf.getint(
-            ads, 'limit', fallback=default_setting.get('limit'))
+        limit = conf.getint(ads,
+                            'limit',
+                            fallback=default_setting.get('limit'))
         qd['limit'] = limit
 
         lang = conf.get(ads, 'lang', fallback=default_setting.get('lang'))
-        if lang.__eq__('en') or lang.__eq__('ko') or lang.__eq__('zh') or lang.__eq__('zh_tw') or lang.__eq__('romaji'):
+        if lang.__eq__('en') or lang.__eq__('ko') or lang.__eq__(
+                'zh') or lang.__eq__('zh_tw') or lang.__eq__('romaji'):
             qd['lang'] = lang
         else:
             qd['lang'] = default_setting.get('lang')
@@ -366,14 +371,17 @@ class config:
     def get_skip_recorded():
         '''获取是否跳过记录的id项'''
         skip_recorded = conf.getboolean(
-            ads, 'skip_recorded', fallback=default_setting.get('skip_recorded'))
+            ads,
+            'skip_recorded',
+            fallback=default_setting.get('skip_recorded'))
         return skip_recorded
 
     @staticmethod
     def get_retry():
         '''获取重试次数'''
-        retry = conf.getint(
-            ads, 'retry', fallback=default_setting.get('retry'))
+        retry = conf.getint(ads,
+                            'retry',
+                            fallback=default_setting.get('retry'))
         return retry
 
     @staticmethod
@@ -393,7 +401,7 @@ class config:
     @staticmethod
     def tips():
         '''debug 打印'''
-        print('='*30, 'Tips', '='*30)
+        print('=' * 30, 'Tips', '=' * 30)
         print('当前设置:')
         print(f'图片质量image_quality : {config.get_image_quality()}')
         print(f'是否覆盖is_cover : {config.get_is_cover()}')
@@ -409,7 +417,7 @@ class config:
         print(f'需要谷歌驱动位置:{path.get_chromedriver_exe_path()}')
         print(f'需要火狐驱动位置:{path.get_geckodriver_exe_path()}')
         print(f'需要Edge驱动位置:{path.get_edgedriver_exe_path()}')
-        print('='*60)
+        print('=' * 60)
 
 
 # 创文件夹（防止被删）
