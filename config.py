@@ -3,9 +3,9 @@
 @github : https://github.com/JohnWes7/Daily_Nutrition
 config类因为没有get;所以全部包装成方法防止被修改好了
 '''
-import os
-import json
 import configparser
+import json
+import os
 from urllib import request
 
 
@@ -13,13 +13,17 @@ class path:
     # 直接通过属性名调用 不可更改
     # 文件路径
     # cookie_path = os.path.dirname(__file__) + '/data/cookies.json'
-    # ajax_discovery_data_path = os.path.dirname(__file__) + '/data/wwwpixivnet_ajax_discovery_artworks.json'
-    # download_record_path = os.path.dirname(__file__) + '/data/downloadrecord.json'
-    # performance_log_path = os.path.dirname(__file__) + '/data/performance.json'
+    # ajax_discovery_data_path = os.path.dirname(__file__) +
+    # '/data/wwwpixivnet_ajax_discovery_artworks.json'
+    # download_record_path = os.path.dirname(__file__) +
+    # '/data/downloadrecord.json'
+    # performance_log_path = os.path.dirname(__file__) +
+    # '/data/performance.json'
     # bookmarkdata_path = os.path.dirname(__file__) + '/data/bookmarkdata.json'
     # # 驱动位置
     # chromedriver_exe_path = os.path.dirname(__file__) + '/chromedriver.exe'
-    # geckodriver_exe_path = os.path.dirname(__file__) + '/driver/geckodriver.exe'
+    # geckodriver_exe_path = os.path.dirname(__file__) +
+    # '/driver/geckodriver.exe'
     # edgedriver_exe_path = os.path.dirname(__file__) + '/msedgedriver.exe'
     # # 文件夹路径
     # data_dir = datadir
@@ -161,7 +165,7 @@ class recordcookie:
         '''
         更新cookie 返回用新cookie更新后的cookie数据
         '''
-        if newcookies == None:
+        if newcookies is None:
             return
 
         oldcopy = oldcookies.copy()
@@ -186,7 +190,7 @@ class recordcookie:
         用新cookie 更新到本地
         '''
         oldcookie = tool.get_json_data(path.get_cookie_path())
-        if oldcookie == None:
+        if oldcookie is None:
             # 如果先前没有值直接保存
             oldcookie = newcookies
         else:
@@ -206,7 +210,7 @@ class recordcookie:
             return
 
         record = tool.get_json_data(path=path.get_download_record_path())
-        if record == None:
+        if record is None:
             record = []
 
         record.append(pid)
@@ -216,13 +220,13 @@ class recordcookie:
     def contrast_with_localrecord(id_list: list):
         from src import tool
         '''
-        和本地下载记录对比 返回一个字典包含了 
-        record：本地下载列表
-        unrecord：对比之后发现没有被记录的
-        recorded：已经被记录过的项
+        和本地下载记录对比 返回一个字典包含了
+        record: 本地下载列表
+        unrecord: 对比之后发现没有被记录的
+        recorded: 已经被记录过的项
         '''
         record = tool.get_json_data(path.get_download_record_path())
-        if record == None:
+        if record is None:
             record = []
 
         recorded = []

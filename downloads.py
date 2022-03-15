@@ -4,24 +4,28 @@
 '''
 
 from posixpath import relpath
+
 from src import tool
+
 if __name__ == '__main__':
     tool.check()
-from config import path, url, recordcookie, config
-from types import FunctionType
-from typing import Any
-from urllib import request
-from urllib.parse import (urlencode, _splittype)
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions
-from bs4 import BeautifulSoup
+import contextlib
 import json
 import os
 import sys
-from src import custom_driver
-from urllib.error import ContentTooShortError
 import tempfile
-import contextlib
+from types import FunctionType
+from typing import Any
+from urllib import request
+from urllib.error import ContentTooShortError
+from urllib.parse import _splittype, urlencode
+
+from bs4 import BeautifulSoup
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
+
+from config import config, path, recordcookie, url
+from src import custom_driver
 
 pixiv_discovery_api1 = 'https://www.pixiv.net/rpc/recommender.php?type=illust&sample_illusts=auto&num_recommendations=60&page=discovery&mode=all'
 pixiv_discovery_api2 = 'https://www.pixiv.net/ajax/discovery/artworks'
