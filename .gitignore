@@ -1,6 +1,7 @@
 # 忽略data下的所有文件
 /data/*
 !/data/.gitkeep
+!/data/src_tokens
 
 # 忽略下载图片下的所有文件
 /tutu/*
@@ -139,3 +140,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+!/data/src_tokens
