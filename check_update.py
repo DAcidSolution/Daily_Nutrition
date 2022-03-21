@@ -40,12 +40,8 @@ class py_info:
     def progressbar(chunk: int, chunk_num: int, total: int):
         '''进度条'''
         barmaxcount = 20  # 进度条格子数量
-        if total == 0:
-            per = 1
-        else:
-            per = 1.0 * chunk * chunk_num / total
-        if per > 1:
-            per = 1
+        per = 1 if total == 0 else 1.0 * chunk * chunk_num / total
+        per = min(per, 1)
         kb = total/1024
         count = int(barmaxcount*per)
 
@@ -163,13 +159,7 @@ def downloadpy(pylist: list[py_info], dir: str = path.get_data_temp_dir()) -> li
     下载全部list里面的py文件
     返回下载失败的项目list
     '''
-    faillist = []
-
-    for pyinfo in pylist:
-        if not pyinfo.download(rootdir=dir):
-            faillist.append(pyinfo)
-
-    return faillist
+    return [pyinfo for pyinfo in pylist if not pyinfo.download(rootdir=dir)]
 
 
 def __tips(filelist: list[py_info]):
@@ -198,17 +188,15 @@ def __main():
     # 连接部分
     filelist = None
     print('='*30, '开始获取仓库信息', '='*30)
+    # 遍历获得仓库所有py文件信息
+    github_url = 'https://github.com/JohnWes7/Daily_Nutrition'
     while True:
-        # 遍历获得仓库所有py文件信息
-        github_url = 'https://github.com/JohnWes7/Daily_Nutrition'
         filelist = get_all_githubrepo_py(github_url)
 
         if type(filelist) == list:
             break
-        # 如果获取不到 返回false 重新获取
         else:
             input('获取仓库信息失败 回车重新尝试连接下载github\n')
-            continue
     print('='*30, '仓库信息获取完毕', '='*30, end='\n\n')
 
     # 打印提示
@@ -220,17 +208,14 @@ def __main():
     while True:
         # 下载
         fail = downloadpy(downloadlist)
-        # 成功跳出
         if len(fail) == 0:
             break
-        # 有失败项目重新尝试
-        else:
-            print(f'{len(fail)}个下载失败：')
-            for info in fail:
-                print(info.name, end=' ')
-            print()
-            input('按下回车重新尝试下载失败项')
-            downloadlist = fail
+        print(f'{len(fail)}个下载失败：')
+        for info in fail:
+            print(info.name, end=' ')
+        print()
+        input('按下回车重新尝试下载失败项')
+        downloadlist = fail
     print('='*30, '下载完成', '='*30, end='\n\n')
 
     # 覆盖部分
@@ -247,19 +232,17 @@ def __main():
                 # 打开下载的文件
                 temp = open(info.get_temppath(), 'r', encoding='utf-8')
                 temp_data = temp.read()
-                # 打开本地需要替换或者新建的位置
-                local = open(cwd+info.get_relative(), 'w', encoding='utf-8')
-                local.write(temp_data)
+                with open(cwd+info.get_relative(), 'w', encoding='utf-8') as local:
+                    local.write(temp_data)
 
-                temp.close()
-                local.close()
+                    temp.close()
                 os.remove(info.get_temppath())
                 print('写入成功')
             except Exception as e:
                 failr.append(info)
                 print('错误', e)
 
-        if len(failr) == 0:
+        if not failr:
             print('全部写入成功')
             break
         else:

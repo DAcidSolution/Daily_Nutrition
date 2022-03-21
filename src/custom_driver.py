@@ -16,7 +16,6 @@ def options_desired_capabilities_chrome(is_proxy=False, is_getlog=False):
     'desired_capabilities' : desired_capabilities\n
     'options' : options\n
     '''
-    od_dict = {}
     caps = None
     opt = webdriver.ChromeOptions()
     opt.add_experimental_option(
@@ -43,30 +42,17 @@ def options_desired_capabilities_chrome(is_proxy=False, is_getlog=False):
             }
         }
 
-    od_dict['desired_capabilities'] = caps
-    od_dict['options'] = opt
-
-    return od_dict
+    return {'desired_capabilities': caps, 'options': opt}
 
 
 def options_desired_capabilities_firefox(is_proxy=False, is_getlog=False):
     '''
     未完工
     '''
-    od_dict = {}
     caps = None
     opt = webdriver.FirefoxOptions()
 
-    if is_proxy:
-        pass
-
-    if is_getlog:
-        pass
-
-    od_dict['desired_capabilities'] = caps
-    od_dict['options'] = opt
-
-    return od_dict
+    return {'desired_capabilities': caps, 'options': opt}
 
 
 def options_desired_capabilities_edge(is_proxy=False, is_getlog=False):
@@ -75,7 +61,6 @@ def options_desired_capabilities_edge(is_proxy=False, is_getlog=False):
     'desired_capabilities' : desired_capabilities\n
     'options' : options\n
     '''
-    od_dict = {}
     caps = None
     opt = EdgeOptions()
     opt.use_chromium = True
@@ -103,10 +88,7 @@ def options_desired_capabilities_edge(is_proxy=False, is_getlog=False):
             }
         }
 
-    od_dict['desired_capabilities'] = caps
-    od_dict['options'] = opt
-
-    return od_dict
+    return {'desired_capabilities': caps, 'options': opt}
 
 
 def get_custom_options_desired_capabilities(name: str, is_proxy=False, is_getlog=False) -> dict:
@@ -128,9 +110,8 @@ def custom_chrome(options=None, desired_capabilities=None) -> WebDriver:
     driver_path = path.get_chromedriver_exe_path()
     if os.path.exists(driver_path):
         print('加载谷歌驱动')
-        driver = webdriver.Chrome(executable_path=driver_path,
+        return webdriver.Chrome(executable_path=driver_path,
             options=options, desired_capabilities=desired_capabilities)
-        return driver
 
     print('缺少谷歌驱动', driver_path)
 
@@ -139,9 +120,12 @@ def custom_firefox(options=None, desired_capabilities=None) -> WebDriver:
     driver_path = path.get_geckodriver_exe_path()
     if os.path.exists(driver_path):
         print('加载火狐驱动')
-        driver = webdriver.Firefox(executable_path=driver_path,
-                                   options=options, desired_capabilities=desired_capabilities)
-        return driver
+        return webdriver.Firefox(
+            executable_path=driver_path,
+            options=options,
+            desired_capabilities=desired_capabilities,
+        )
+
 
     print('缺少火狐驱动', driver_path)
 
@@ -150,8 +134,12 @@ def custom_edge(options=None, desired_capabilities=None):
     driver_path = path.get_edgedriver_exe_path()
     if os.path.exists(driver_path):
         print('加载edge驱动')
-        driver = webdriver.Edge(executable_path=driver_path, options=options, capabilities=desired_capabilities)
-        return driver
+        return webdriver.Edge(
+            executable_path=driver_path,
+            options=options,
+            capabilities=desired_capabilities,
+        )
+
 
     print('缺少edge驱动', driver_path)
 
@@ -163,5 +151,4 @@ def get_custom_driver(name: str, options=None, desired_capabilities=None) -> Web
         'edge':custom_edge
     }
 
-    driver = name_driver_func.get(name)(options, desired_capabilities)
-    return driver
+    return name_driver_func.get(name)(options, desired_capabilities)
