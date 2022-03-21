@@ -45,19 +45,10 @@ class illustration:
     def progressbar(block_num: int, block_size: int, total: int, name):
         '''进度条'''
         barmaxcount = 20  # 进度条格子数量
-        if total == 0:
-            per = 1
-        else:
-            per = 1.0 * block_num * block_size / total
-        if per > 1:
-            per = 1
-
+        per = 1 if total == 0 else 1.0 * block_num * block_size / total
+        per = min(per, 1)
         kb = total/1024
-        size = '{0:.2f}KB'.format(kb)
-        if kb > 1024:
-            mb = kb/1024
-            size = '{0:.2f}MB'.format(mb)
-
+        size = '{0:.2f}MB'.format(kb/1024) if kb > 1024 else '{0:.2f}KB'.format(kb)
         count = int(barmaxcount*per)
 
         print('\rdownload {4} {0:.2f}% :|{1}{2}| total:{3}'.format(
@@ -67,13 +58,13 @@ class illustration:
         '''获得该插画主页html'''
         info_url = f'https://www.pixiv.net/artworks/{self.id}'
         global _opener
-        if opener == None:
+        if opener is None:
             print('默认opener')
-            if _opener == None:
+            if _opener is None:
                 opener = _opener = request.build_opener()
             else:
                 opener = _opener
-        if headers == None:
+        if headers is None:
             headers = _headtemplate
 
         head = headers.copy()
@@ -84,13 +75,13 @@ class illustration:
     def get_name(self, opener=None, headers=None):
         '''获取插画标题'''
         global _opener
-        if self.__name == None:
-            if opener == None:
-                if _opener == None:
+        if self.__name is None:
+            if opener is None:
+                if _opener is None:
                     opener = _opener = request.build_opener()
                 else:
                     opener = _opener
-            if headers == None:
+            if headers is None:
                 headers = _headtemplate
 
             html = self.get_html(opener, headers)
@@ -113,13 +104,13 @@ class illustration:
     def get_srclist(self, opener=None, headers=None) -> list:
         '''获取该插画的图源url'''
         global _opener
-        if self.__srclist == None:
-            if opener == None:
-                if _opener == None:
+        if self.__srclist is None:
+            if opener is None:
+                if _opener is None:
                     opener = _opener = request.build_opener()
                 else:
                     opener = _opener
-            if headers == None:
+            if headers is None:
                 headers = _headtemplate
 
             src_url = f'https://www.pixiv.net/ajax/illust/{self.id}/pages?lang=zh'
@@ -136,14 +127,14 @@ class illustration:
 
     def download(self, dir:str, opener=None, headers=None, image_quality: str = 'original', reporthook=progressbar):
         global _opener
-        if opener == None:
-            if _opener == None:
+        if opener is None:
+            if _opener is None:
                 opener = _opener = request.build_opener()
             else:
                 opener = _opener
-            if headers == None:
+            if headers is None:
                 headers = _headtemplate
-        
+
         if not os.path.exists(dir):
             os.makedirs(dir)
 
@@ -159,16 +150,13 @@ class illustration:
             name = f'{self.id}_{name}_p{p}{suffix}'
 
             filename = ''
-            if dir[len(dir)-1] == '/' or dir[len(dir)-1] == '\\':
-                filename = dir + name
-            else:
-                filename = dir + '/' + name
+            filename = dir + name if dir[len(dir)-1] in ['/', '\\'] else f'{dir}/{name}'
             while True:
                 if os.path.exists(filename):
                     filename += '(1)'
                 else:
                     break
-                
+
 
 
             custom_urlretrieve(request.Request(imageurl, headers=head), opener=opener,
@@ -217,14 +205,11 @@ def custom_urlretrieve(url, opener: request.OpenerDirector = None, filename=None
             filename = tfp.name
 
         with tfp:
-            result = filename, headers
-            bs = 1024*8
-            size = -1
             read = 0
             blocknum = 0
-            if "content-length" in headers:
-                size = int(headers["Content-Length"])
-
+            result = filename, headers
+            size = int(headers["Content-Length"]) if "content-length" in headers else -1
+            bs = 1024*8
             if reporthook:
                 reporthook(blocknum, bs, size)
 
@@ -251,7 +236,7 @@ def dicovery_json(head=None, opener=None):
     # 检查传入opener
     if opener is None:
         opener = request.build_opener()
-    if head == None:
+    if head is None:
         head = recordcookie.get_headtemplate()
 
     # 更改header
@@ -262,7 +247,7 @@ def dicovery_json(head=None, opener=None):
     query_string = urlencode(qd)
 
     # request
-    url = pixiv_discovery_api2 + '?' + query_string
+    url = f'{pixiv_discovery_api2}?{query_string}'
     print(url)
     requ = request.Request(url, headers=head, method='GET')
     # open
@@ -270,9 +255,7 @@ def dicovery_json(head=None, opener=None):
     print('pixiv: ', resp.getcode())
     r_bt = resp.read()
     r_str = r_bt.decode()
-    resp_json = json.loads(r_str)
-
-    return resp_json
+    return json.loads(r_str)
 
 
 def download_idlist(id_list: list[str], dir, opener=None, head=None, callback_delegate: FunctionType = None, retry=3, iscover=False):
@@ -283,12 +266,12 @@ def download_idlist(id_list: list[str], dir, opener=None, head=None, callback_de
     delegat: method(pid: str, is_success: bool)\n
     '''
     global _opener
-    if opener == None:
-        if _opener == None:
+    if opener is None:
+        if _opener is None:
             opener = _opener = request.build_opener()
         else:
             opener = _opener
-        if head == None:
+        if head is None:
             head = _headtemplate
 
     success_list = []
@@ -315,12 +298,12 @@ def download_id(pid:str, dir, opener=None, headers=None, image_quality: str = 'o
 
     # 如果没有传入opener 就要自己造一个
     global _opener
-    if opener == None:
-        if _opener == None:
+    if opener is None:
+        if _opener is None:
             opener = _opener = request.build_opener()
         else:
             opener = _opener
-        if headers == None:
+        if headers is None:
             headers = _headtemplate
 
     head = headers.copy()
@@ -448,13 +431,8 @@ def parsing_tutu_data2(jsondata):
     解析 pixiv_discovery_api2返回的json数据\n
     从中提取出一个推荐pid的列表并返回
     '''
-    id_list = []
-
     re_list = jsondata.get('body').get('recommendedIllusts')
-    for item in re_list:
-        id_list.append(item.get('illustId'))
-
-    return id_list
+    return [item.get('illustId') for item in re_list]
 
 
 def __open_driver_save_cookie():
@@ -540,7 +518,7 @@ if __name__ == '__main__':
 
     # 直到连接上pixiv 并返回json推荐数据
     discoveryjson = __until_linkup(opener=opener)
-    if dicovery_json == None:
+    if dicovery_json is None:
         input('没有获取到数据 结束进程')
         sys.exit(1)
 

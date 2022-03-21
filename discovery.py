@@ -37,16 +37,16 @@ def analysis_log(log: str, post_data_list: list):
         message = json.loads(item.get('message')).get('message')
 
         params = message.get('params')
-        if params == None:
+        if params is None:
             params_none += 1
             continue
 
         requ = params.get('request')
-        if requ == None:
+        if requ is None:
             requ_none += 1
             continue
 
-        if requ.get('url') == None:
+        if requ.get('url') is None:
             continue
 
         # 加入收藏时触发
@@ -68,7 +68,7 @@ def analysis_log(log: str, post_data_list: list):
                 print(e)
 
         match = re.match(f'{bookmark_event_url}.*', requ.get('url'))
-        if not match == None:
+        if not match is None:
             tempdict = {'url': requ.get('url')}
             post_data_list.append(tempdict)
 
@@ -143,11 +143,12 @@ def open_discovery():
 def get_pid_list() -> list[downloads.illustration]:
     d_list = []
     global post_list
-    for item in post_list:
-        id = item.get('illust_id')
-        if id:
-            d_list.append(downloads.illustration(id))
-            
+    d_list.extend(
+        downloads.illustration(id)
+        for item in post_list
+        if (id := item.get('illust_id'))
+    )
+
     return d_list
 
 
