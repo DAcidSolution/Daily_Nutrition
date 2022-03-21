@@ -31,7 +31,8 @@ class py_info:
 
     def get_raw_url(self):
         '''获得raw界面的网址'''
-        return 'https://raw.githubusercontent.com'+self.href.replace('/blob/', '/')
+        return 'https://raw.githubusercontent.com'\
+            + self.href.replace('/blob/', '/')
 
     def get_temppath(self):
         return self.__temppath
@@ -40,23 +41,17 @@ class py_info:
     def progressbar(chunk: int, chunk_num: int, total: int):
         '''进度条'''
         barmaxcount = 20  # 进度条格子数量
-        if total == 0:
-            per = 1
-        else:
-            per = 1.0 * chunk * chunk_num / total
-        if per > 1:
-            per = 1
+        per = 1 if total == 0 else 1.0 * chunk * chunk_num / total
+        per = min(per, 1)
         kb = total/1024
         count = int(barmaxcount*per)
 
         print('\rdownload {0:.2f}% :|{1}{2}| total:{3:.2f}KB'.format(
-            per*100, '■'*count, ' '*(barmaxcount-count), kb), end='')
+            per*100, '■'*count,    ' '*(barmaxcount-count), kb), end='')
 
     def download(self, rootdir: str = path.get_data_temp_dir()):
         '''下载该pyinfo的数据到指定目录 返回下载是否成功'''
         url = self.get_raw_url()
-
-        resp = None
         i = 0
         while i < config.get_retry():
             try:
@@ -150,26 +145,21 @@ def get_all_githubrepo_py(url: str) -> list[py_info]:
         elif ispy(name):
             # https://raw.githubusercontent.com/JohnWes7/Daily_Nutrition/main/config.py
             # https://github.com/JohnWes7/Daily_Nutrition/blob/main/src/__init__.py
-            print(f'遍历到py文件 {name}')
+            print(f'遍历到py文件    {name}')
             info = py_info(name=name, href=href)
             filelist.append(info)
 
     return filelist
 
 
-def downloadpy(pylist: list[py_info], dir: str = path.get_data_temp_dir()) -> list[py_info]:
+def downloadpy(pylist: list[py_info], dir: str = path.get_data_temp_dir())\
+        -> list[py_info]:
     '''
     传入要下载的 pylist列表 和 暂存文件夹
     下载全部list里面的py文件
     返回下载失败的项目list
     '''
-    faillist = []
-
-    for pyinfo in pylist:
-        if not pyinfo.download(rootdir=dir):
-            faillist.append(pyinfo)
-
-    return faillist
+    return [pyinfo for pyinfo in pylist if not pyinfo.download(rootdir=dir)]
 
 
 def __tips(filelist: list[py_info]):
@@ -198,17 +188,15 @@ def __main():
     # 连接部分
     filelist = None
     print('='*30, '开始获取仓库信息', '='*30)
+    # 遍历获得仓库所有py文件信息
+    github_url = 'https://github.com/JohnWes7/Daily_Nutrition'
     while True:
-        # 遍历获得仓库所有py文件信息
-        github_url = 'https://github.com/JohnWes7/Daily_Nutrition'
         filelist = get_all_githubrepo_py(github_url)
 
         if type(filelist) == list:
             break
-        # 如果获取不到 返回false 重新获取
         else:
             input('获取仓库信息失败 回车重新尝试连接下载github\n')
-            continue
     print('='*30, '仓库信息获取完毕', '='*30, end='\n\n')
 
     # 打印提示
@@ -220,17 +208,14 @@ def __main():
     while True:
         # 下载
         fail = downloadpy(downloadlist)
-        # 成功跳出
         if len(fail) == 0:
             break
-        # 有失败项目重新尝试
-        else:
-            print(f'{len(fail)}个下载失败：')
-            for info in fail:
-                print(info.name, end=' ')
-            print()
-            input('按下回车重新尝试下载失败项')
-            downloadlist = fail
+        print(f'{len(fail)}个下载失败：')
+        for info in fail:
+            print(info.name, end=' ')
+        print()
+        input('按下回车重新尝试下载失败项')
+        downloadlist = fail
     print('='*30, '下载完成', '='*30, end='\n\n')
 
     # 覆盖部分
@@ -239,7 +224,7 @@ def __main():
     cwd = path.getcwd()
 
     while True:
-        failr = []
+        failure = []
         for info in replacelist:
             try:
                 name = info.name
@@ -247,34 +232,31 @@ def __main():
                 # 打开下载的文件
                 temp = open(info.get_temppath(), 'r', encoding='utf-8')
                 temp_data = temp.read()
-                # 打开本地需要替换或者新建的位置
-                local = open(cwd+info.get_relative(), 'w', encoding='utf-8')
-                local.write(temp_data)
+                with open(cwd+info.get_relative(), 'w', encoding='utf-8')\
+                     as local:
+                    local.write(temp_data)
 
-                temp.close()
-                local.close()
+                    temp.close()
                 os.remove(info.get_temppath())
                 print('写入成功')
             except Exception as e:
-                failr.append(info)
+                failure.append(info)
                 print('错误', e)
-
-        if len(failr) == 0:
+        if not failure:
             print('全部写入成功')
             break
         else:
-            print(f'{len(failr)}个写入失败尝试重试')
-            for info in failr:
+            print(f'{len(failure)}个写入失败尝试重试')
+            for info in failure:
                 print(info.name, end='')
             print()
-            replacelist = failr
+            replacelist = failure
     print()
 
     input('done')
 
 
 if __name__ == '__main__':
-    
     __main()
 
     # opener = downloads.build_custom_opener()

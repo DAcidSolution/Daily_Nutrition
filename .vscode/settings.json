@@ -2,5 +2,16 @@
     "python.linting.pylintEnabled": false,
     "python.linting.enabled": true,
     "python.linting.pycodestyleEnabled": false,
-    "python.linting.flake8Enabled": true
+    "python.linting.flake8Enabled": true,
+    "cSpell.words": [
+        "idlist",
+        "Illusts",
+        "isadd",
+        "iscover",
+        "KHTML",
+        "kvlist",
+        "msedgedriver",
+        "srclist",
+        "wwwpixivnet"
+    ]
 }

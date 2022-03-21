@@ -23,7 +23,8 @@ import re
 post_list = []
 add_book_url = 'https://www.pixiv.net/ajax/illusts/bookmarks/add'
 delete_book_url = 'https://www.pixiv.net/rpc/index.php'
-bookmark_event_url = 'https://event.pixiv-recommend.net/\?platform=pc&action=click-bookmark.*'
+bookmark_event_url = \
+    r'https://event.pixiv-recommend.net/\?platform=pc&action=click-bookmark.*'
 
 
 def analysis_log(log: str, post_data_list: list):
@@ -31,36 +32,36 @@ def analysis_log(log: str, post_data_list: list):
     解析driver 返回的log提取有用部分加入到
     '''
     params_none = 0
-    requ_none = 0
+    req_none = 0
 
     for item in log:
         message = json.loads(item.get('message')).get('message')
 
         params = message.get('params')
-        if params == None:
+        if params is None:
             params_none += 1
             continue
 
-        requ = params.get('request')
-        if requ == None:
-            requ_none += 1
+        req = params.get('request')
+        if req is None:
+            req_none += 1
             continue
 
-        if requ.get('url') == None:
+        if req.get('url') is None:
             continue
 
         # 加入收藏时触发
-        if requ.get('url').__eq__(add_book_url) and requ.get('method').__eq__(
+        if req.get('url').__eq__(add_book_url) and req.get('method').__eq__(
                 "POST"):
-            print(requ.get('postData'))
-            post_data_list.append(json.loads(requ.get('postData')))
+            print(req.get('postData'))
+            post_data_list.append(json.loads(req.get('postData')))
 
         # 取消收藏时触发
-        if requ.get('url').__eq__(delete_book_url) and requ.get(
+        if req.get('url').__eq__(delete_book_url) and req.get(
                 'method').__eq__("POST"):
-            print(requ.get('postData'))
+            print(req.get('postData'))
             try:
-                kvlist = requ.get('postData').split('&')
+                kvlist = req.get('postData').split('&')
                 qs_dict = {}
                 for item in kvlist:
                     kvp = item.split('=')
@@ -69,19 +70,23 @@ def analysis_log(log: str, post_data_list: list):
             except Exception as e:
                 print(e)
 
-        match = re.match(f'{bookmark_event_url}.*', requ.get('url'))
-        if not match == None:
-            tempdict = {'url': requ.get('url')}
+        match = re.match(f'{bookmark_event_url}.*', req.get('url'))
+        if match is not None:
+            tempdict = {'url': req.get('url')}
             post_data_list.append(tempdict)
 
     print(
-        f'analysis: loglen:{log.__len__()}\tparams_none:{params_none}\trequ_none:{requ_none}\tpost_list:{post_list.__len__()}'
-    )
+        f'analysis: loglen:\
+            {log.__len__()}\t \
+            params_none:{params_none}\t \
+            req_none:{req_none}\t \
+            post_list:{post_list.__len__()}'
+        )
 
 
 def delegate_title_is_pixiv(x: WebDriver):
     '''
-    等待用户自行跳转至主页 按照步长执行委托
+    等待用户自行跳转至主页  按照步长执行委托
     处理从浏览器截取的log数据
     '''
     log = []
@@ -115,7 +120,7 @@ def open_discovery():
             try:
                 driver.add_cookie(item)
             except Exception as e:
-                print('加入cookie时发生: ', e)
+                print('加入cookie时发生:    ', e)
 
     # 刷新
     print('刷新')
@@ -146,10 +151,11 @@ def open_discovery():
 def get_pid_list() -> list[downloads.illustration]:
     d_list = []
     global post_list
-    for item in post_list:
-        id = item.get('illust_id')
-        if id:
-            d_list.append(downloads.illustration(id))
+    d_list.extend(
+        downloads.illustration(id)
+        for item in post_list
+        if (id := item.get('illust_id'))
+    )
 
     return d_list
 
@@ -163,9 +169,7 @@ if __name__ == '__main__':
 
     # 保存这次浏览
     tool.save_str_data(path.get_bookmarkdata_path(), json.dumps(post_list))
-
-    #打印
-    d_list = get_pid_list()
+    d_list = get_pid_list()  # 打印
     print(f'开始执行下载\n将要执行下载：{len(d_list)}\nlist:')
     for tu in d_list:
         print(tu.id, end=' ')

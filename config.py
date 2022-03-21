@@ -33,7 +33,7 @@ class path:
     @staticmethod
     def get_cookie_path():
         '''cookie文件路径'''
-        return os.path.dirname(__file__) + '/data/cookies.json'
+        return f'{os.path.dirname(__file__)}/data/cookies.json'
 
     @staticmethod
     def get_ajax_discovery_data_path():
@@ -44,59 +44,61 @@ class path:
     @staticmethod
     def get_download_record_path():
         '''下载过的图的记录数据路径'''
-        return os.path.dirname(__file__) + '/data/downloadrecord.json'
+        return f'{os.path.dirname(__file__)}/data/downloadrecord.json'
 
     @staticmethod
     def get_performance_log_path():
         '''浏览器log文件保存路径'''
-        return os.path.dirname(__file__) + '/data/performance.json'
+        return f'{os.path.dirname(__file__)}/data/performance.json'
 
     @staticmethod
     def get_bookmarkdata_path():
         '''调用add网络请求的记录'''
-        return os.path.dirname(__file__) + '/data/bookmarkdata.json'
+        return f'{os.path.dirname(__file__)}/data/bookmarkdata.json'
 
     # 驱动位置
     @staticmethod
     def get_chromedriver_exe_path():
         '''谷歌驱动路径'''
-        return os.path.dirname(__file__) + '/chromedriver.exe'
+        return f'{os.path.dirname(__file__)}/chromedriver.exe'
 
     @staticmethod
     def get_geckodriver_exe_path():
         '''火狐驱动路径'''
-        return os.path.dirname(__file__) + '/driver/geckodriver.exe'
+        return f'{os.path.dirname(__file__)}/driver/geckodriver.exe'
 
     @staticmethod
     def get_edgedriver_exe_path():
         '''edge驱动路径'''
-        return os.path.dirname(__file__) + '/msedgedriver.exe'
+        return f'{os.path.dirname(__file__)}/msedgedriver.exe'
 
     # 文件夹路径
     @staticmethod
     def get_data_dir():
         '''data文件夹路径'''
-        return os.path.dirname(__file__) + '/data/'
+        return f'{os.path.dirname(__file__)}/data/'
 
     @staticmethod
     def get_data_temp_dir():
         '''temp文件夹路径'''
-        return path.get_data_dir() + 'temp/'
+        return f'{path.get_data_dir()}temp/'
 
     @staticmethod
     def getcwd():
         '''获得环境文件夹路径'''
-        return os.path.dirname(__file__) + '/'
+        return f'{os.path.dirname(__file__)}/'
 
     @staticmethod
     def get_tutu_dir():
-        return os.path.dirname(__file__) + '/tutu/'
+        return f'{os.path.dirname(__file__)}/tutu/'
 
 
 class url:
     pixiv = 'https://www.pixiv.net/'
-    pixiv_login_page = 'https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index'
-    discover_page = 'https://www.pixiv.net/discovery'
+    pixiv_login_page = 'https://accounts.pixiv.net/\
+        login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index'
+
+    discovery_page = 'https://www.pixiv.net/discovery'
 
     @staticmethod
     def get_pixiv():
@@ -104,7 +106,8 @@ class url:
 
     @staticmethod
     def get_pixiv_login_page():
-        return 'https://accounts.pixiv.net/login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index'
+        return 'https://accounts.pixiv.net/\
+            login?lang=zh&source=pc&view_type=page&ref=wwwtop_accounts_index'
 
     @staticmethod
     def get_discover_page():
@@ -115,10 +118,11 @@ class recordcookie:
     custom_cookie = {}
 
     headtemplate = {
-        'user-agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.30',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
+        AppleWebKit/537.36 (KHTML, like Gecko) \
+        Chrome/95.0.4638.54 Safari/537.36 Edg/95.0.1020.30',
         'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-        'referer': 'https://www.pixiv.net/discovery'
+        'referrer': 'https://www.pixiv.net/discovery'
     }
 
     @staticmethod
@@ -138,10 +142,7 @@ class recordcookie:
 
         # 添加客制化cookie
         for name in recordcookie.custom_cookie.keys():
-            tempdict = {}
-            tempdict['name'] = name
-            tempdict['value'] = config.custom_cookie.get(name)
-
+            tempdict = {'name': name, 'value': config.custom_cookie.get(name)}
             cookiejson.append(tempdict)
 
         # 添加已经抓取的cookie到head
@@ -150,10 +151,7 @@ class recordcookie:
             name = item.get('name')
             value = item.get('value')
             temp = None
-            if i == 0:
-                temp = f'{name}={value}'
-            else:
-                temp = f'; {name}={value}'
+            temp = f'{name}={value}' if i == 0 else f'; {name}={value}'
             cookiestr += temp
 
         head['cookie'] = cookiestr
@@ -222,7 +220,7 @@ class recordcookie:
         '''
         和本地下载记录对比 返回一个字典包含了
         record: 本地下载列表
-        unrecord: 对比之后发现没有被记录的
+        unrecorded: 对比之后发现没有被记录的
         recorded: 已经被记录过的项
         '''
         record = tool.get_json_data(path.get_download_record_path())
@@ -230,19 +228,18 @@ class recordcookie:
             record = []
 
         recorded = []
-        unrecord = []
+        unrecorded = []
         for id in id_list:
             if id in record:
                 recorded.append(id)
             else:
-                unrecord.append(id)
+                unrecorded.append(id)
 
-        id_dict = {
+        return {
             'record': record,
-            'unrecord': unrecord,
+            'unrecorded': unrecorded,
             'recorded': recorded
         }
-        return id_dict
 
 
 # 通过静态方法调用放外面
@@ -266,7 +263,7 @@ default_setting = {
 }
 
 # 读取Config.ini
-conf_path = os.path.dirname(__file__) + '/Config.ini'
+conf_path = f'{os.path.dirname(__file__)}/Config.ini'
 conf = configparser.ConfigParser()
 conf.read(conf_path, encoding='utf-8')
 
@@ -294,10 +291,9 @@ class config:
     @staticmethod
     def get_is_cover():
         '''获取是否被覆盖'''
-        is_cover = conf.getboolean(ads,
-                                   'is_cover',
-                                   fallback=default_setting.get('is_cover'))
-        return is_cover
+        return conf.getboolean(ads,
+                               'is_cover',
+                               fallback=default_setting.get('is_cover'))
 
     @staticmethod
     def get_browser():
@@ -314,9 +310,9 @@ class config:
     @staticmethod
     def get_forcelogin():
         '''获取是否强制登录'''
-        forcelogin = conf.getboolean(
-            ads, 'forcelogin', fallback=default_setting.get('forcelogin'))
-        return forcelogin
+        return conf.getboolean(ads,
+                               'forcelogin',
+                               fallback=default_setting.get('forcelogin'))
 
     @staticmethod
     def get_ads_download_path():
@@ -325,17 +321,15 @@ class config:
                         'download_path',
                         fallback=default_setting.get('download_path'))
         if os.path.exists(path=path):
-            if path[path.__len__() - 1].__eq__('/'):
-                return path
-            return path + '/'
+            return path if path[path.__len__() - 1].__eq__('/') else f'{path}/'
         return default_setting.get('download_path')
 
     @staticmethod
     def get_is_proxies():
         '''获取是否打开代理'''
-        is_proxies = conf.getboolean(
-            link, 'is_proxies', fallback=default_setting.get('is_proxies'))
-        return is_proxies
+        return conf.getboolean(link,
+                               'is_proxies',
+                               fallback=default_setting.get('is_proxies'))
 
     @staticmethod
     def get_proxies_dict():
@@ -343,8 +337,7 @@ class config:
         http = conf.get(link, 'http', fallback='http://127.0.0.1:1080')
         https = conf.get(link, 'https', fallback='https://127.0.0.1:1080')
 
-        proxies_dict = {'http': http, 'https': https}
-        return proxies_dict
+        return {'http': http, 'https': https}
 
     @staticmethod
     def get_discovery_query_dict():
@@ -374,33 +367,24 @@ class config:
     @staticmethod
     def get_skip_recorded():
         '''获取是否跳过记录的id项'''
-        skip_recorded = conf.getboolean(
-            ads,
-            'skip_recorded',
-            fallback=default_setting.get('skip_recorded'))
-        return skip_recorded
+        return conf.getboolean(ads,
+                               'skip_recorded',
+                               fallback=default_setting.get('skip_recorded'))
 
     @staticmethod
     def get_retry():
         '''获取重试次数'''
-        retry = conf.getint(ads,
-                            'retry',
-                            fallback=default_setting.get('retry'))
-        return retry
+        return conf.getint(ads, 'retry', fallback=default_setting.get('retry'))
 
     @staticmethod
     def build_custom_opener() -> request.OpenerDirector:
         '''根据config.ini创建一个具有代理的opener'''
-        if config.get_is_proxies():
-            # 代理
-            proxies = config.get_proxies_dict()
-            prox = request.ProxyHandler(proxies=proxies)
-            # opener
-            opener = request.build_opener(prox)
-            return opener
-        else:
-            opener = request.build_opener()
-            return opener
+        if not config.get_is_proxies():
+            return request.build_opener()
+        # 代理
+        proxies = config.get_proxies_dict()
+        prox = request.ProxyHandler(proxies=proxies)
+        return request.build_opener(prox)  # opener
 
     @staticmethod
     def tips():
